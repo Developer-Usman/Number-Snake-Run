@@ -9,17 +9,17 @@ using UnityEngine.UIElements;
 public class Player : MonoBehaviour
 {
     private Rigidbody rb;
+    private Vector2 minMaxX = new Vector2(-2.3f, 2.3f);
+
+    private List<GameObject> numberParts = new List<GameObject>();
+    private List<Vector3> positionHistory = new List<Vector3>();
     [SerializeField] private Joystick joystick;
     [SerializeField] private GameObject numberPrefab;
     [SerializeField] private float forwardSpeed = 5f;
     [SerializeField] private float horizontalSpeed = 5f;
     [SerializeField] private int gap = 10;
-    [SerializeField] private float maxYRotation = 30f;    // max yaw (degrees) for horizontal tilt
+    [SerializeField] private float maxYRotation = 30f;
     [SerializeField] private float rotationSpeed = 8f;
-    private Vector2 minMaxX = new Vector2(-2.3f, 2.3f);
-
-    private List<GameObject> numberParts = new List<GameObject>();
-    private List<Vector3> positionHistory = new List<Vector3>();
 
     [Space(10)]
     [Header("Particles")]
@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R)) // reduce testing
         {
             ReduceSnake(5);
         }
@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
         // control movement
         rb.linearVelocity = new Vector3(joystick.Horizontal * horizontalSpeed, rb.linearVelocity.y, forwardSpeed) * Time.fixedDeltaTime;
 
-        // rotate player around Y based on horizontal input (smooth)
+        // rotate player around Y based on horizontal input
         float targetY = joystick.Horizontal * maxYRotation;
         float currentY = Mathf.LerpAngle(transform.eulerAngles.y, targetY, rotationSpeed * Time.fixedDeltaTime);
         transform.rotation = Quaternion.Euler(0f, currentY, 0f);
@@ -66,29 +66,16 @@ public class Player : MonoBehaviour
         int index = 0;
         foreach (var number in numberParts)
         {
-            // Vector3 point = positionHistory[Mathf.Min(index * gap, positionHistory.Count - 1)];
-            // number.transform.position = point;
-            // index++;
-
             int minimum;
-
             minimum = Mathf.Min(index * gap, positionHistory.Count - 1);
             Vector3 point = positionHistory[minimum];
             Vector3 moveDirection = point - number.transform.position;
             number.transform.position += moveDirection * 5f * Time.fixedDeltaTime;
-            // transform.LookAt(point);
-            // don't make the player look at the path (overrides Y-rotation based on joystick)
-            // instead make each number face its target point (optional)
             Vector3 lookPoint = new Vector3(point.x, number.transform.position.y, point.z);
             number.transform.LookAt(lookPoint);
-            // number.transform.position = point;
             index++;
         }
-
-
-
     }
-
     private void GrowSnake(int number = 1) // increase number snake length
     {
 
@@ -141,7 +128,6 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.layer == 6)
         {
-            // numberParts[0].transform.localScale = Vector3.one;
             if (numberParts.Count <= 0) return;
             numberParts[0].transform.DOScale(2.5f, 0.4f).SetEase(Ease.OutBounce).OnComplete(() =>
             {
@@ -231,8 +217,6 @@ public class Player : MonoBehaviour
             StartCoroutine(ResetSpeedAfterDelay(3f, false));
         }
     }
-
-    // Modified coroutine to handle both speed changes
     private IEnumerator ResetSpeedAfterDelay(float delay, bool wasSpeedBoost)
     {
         yield return new WaitForSeconds(delay);

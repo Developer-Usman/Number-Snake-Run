@@ -1,4 +1,3 @@
-using UnityEditor.Rendering;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
@@ -17,19 +16,6 @@ public class CameraFollow : MonoBehaviour {
         initialOffset = offset;
     }
     void FixedUpdate()
-    {
-        YouTube();
-        // Brackey();
-    }
-    void Brackey()
-    {
-        Vector3 desiredPosition = target.position + offset;
-        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
-        transform.position = smoothedPosition;
-
-        transform.LookAt(target);
-    }
-    void YouTube()
     {
         transform.position = new Vector3(Mathf.Lerp(transform.position.x, target.position.x, smoothSpeed), transform.position.y, target.position.z + offset.z);
 
